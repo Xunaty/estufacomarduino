@@ -1,0 +1,128 @@
+#include <Adafruit_LiquidCrystal.h>
+Adafruit_LiquidCrystal lcd(0);
+
+int butao = 2;
+int estadobutao = 0;
+
+int umidade1;
+
+int sensordeluz;
+
+int buzina = 8;
+
+
+//____________LEDs_______________
+
+int leddobutao = 4;
+int ledacionamento = 6;
+int ledalertacritico = 10;
+
+int estadoledverde;
+
+//____________LEDs_______________
+
+void setup()
+{
+  Serial.begin(9600);
+  lcd.begin(16,2);
+  pinMode(butao, INPUT);
+  pinMode(leddobutao, OUTPUT);
+  pinMode(ledacionamento, OUTPUT);
+  pinMode(buzina, OUTPUT);
+  lcd.setCursor(0,0);
+  	lcd.print("Estado Atual:");
+}
+
+void loop()
+{
+//_______________________BUTÃO________________________________________
+  
+  estadobutao = digitalRead(butao);
+  estadoledverde = digitalRead(leddobutao);
+  if (estadobutao == HIGH ) { 
+    delay(0);
+	digitalWrite(leddobutao , HIGH);
+  }
+  else { 
+    digitalWrite(leddobutao , LOW);
+  }
+//_______________________BUTÃO________________________________________
+
+  
+  
+//___________LEITURA DO SENSOR DE UMIDADE_________________
+  
+	umidade1 = analogRead(A0);
+	Serial.print("Umidade:" );
+    Serial.println(umidade1);
+  
+//___________LEITURA DO SENSOR DE UMIDADE____________________________________
+
+
+//___________LEITURA DO SENSOR DE LUZ____________________________________
+
+  sensordeluz = analogRead(A1);
+  Serial.print("Luz:" );
+  Serial.println(sensordeluz);
+
+
+//___________LEITURA DO SENSOR DE LUZ______________________________________________
+  
+  
+//___________CONDICIONAIS DO SISTEMA______________________
+
+//---------UMIDADE---------
+  if (umidade1 > 300 || sensordeluz < 100){
+  	digitalWrite(ledacionamento, LOW);
+  }
+  
+  else if (umidade1 < 300 && sensordeluz > 100){
+  	digitalWrite(ledacionamento, HIGH);
+  }
+
+  if (umidade1 <50 ){
+  	digitalWrite(ledalertacritico, HIGH);
+	delay(1000);
+	digitalWrite(ledalertacritico, LOW);
+	delay(1000);
+  
+  }
+//---------UMIDADE---------
+
+
+//---------BUZINA-----------
+  
+  
+  if (umidade1 < 100 && estadoledverde == HIGH){
+  	delay(3000); 
+  	
+    if (umidade1 < 100 && digitalRead(leddobutao) == HIGH){
+      tone(buzina, 1047);
+    } 
+  
+  }else {
+    noTone(buzina);
+  }
+
+//---------BUZINA-----------
+
+
+//___________CONDICIONAIS DO SISTEMA_____________________
+
+//___________TELA LCD_____________________
+
+  if (umidade1 < 50 && sensordeluz < 100){
+  	lcd.setCursor(0,1);
+  	lcd.print("Aguardando luz ");
+  } else if (umidade1 < 50 && sensordeluz > 100){
+  	lcd.setCursor(0,1);
+  	lcd.print("Solo seco     ");
+  } else if ( umidade1 > 50){
+    lcd.setCursor(0,1);
+  	lcd.print("Solo umido      ");
+  }
+  
+	
+
+//___________TELA LCD_____________________
+}
